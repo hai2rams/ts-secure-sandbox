@@ -1,6 +1,6 @@
 import { AuditRequest } from '../domain/entities';
 
-const KEYWORD_BLACKLIST = ['sanctions', 'offshore', 'shell company', 'money laundering'];
+const KEYWORD_BLACKLIST = ['sanctions', 'offshore', 'shell company', 'money laundering', 'crypto'];
 
 const TENANT_TIER_LIMITS = {
   STANDARD: 500,
