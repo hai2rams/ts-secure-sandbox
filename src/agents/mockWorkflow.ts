@@ -1,5 +1,6 @@
 import { AuditRequest, ExecutionReceipt } from '../domain/entities';
 import { evaluateComplianceRules } from '../core/complianceEngine';
+import { evaluateSemanticCompliance } from '../services/geminiAgent';
 
 function buildReceipt(
   tenantId: string,
@@ -34,5 +35,16 @@ export async function runStaticMockWorkflow(
   }
 
   console.log(`[Router] 🟢 Local deterministic compliance rules passed for ${tenantId}.`);
-  return buildReceipt(tenantId, 'APPROVED', assessment.reason);
+
+  const semanticAssessment = await evaluateSemanticCompliance(payload);
+
+  if (!semanticAssessment.passed) {
+    console.log(
+      `[Router] ❌ Semantic AI violation flagged for ${tenantId}: ${semanticAssessment.policyViolated} (risk: ${semanticAssessment.riskScore})`,
+    );
+    return buildReceipt(tenantId, 'REJECTED', semanticAssessment.reasoning);
+  }
+
+  console.log(`[Router] 🟢 Semantic AI compliance passed for ${tenantId}.`);
+  return buildReceipt(tenantId, 'APPROVED', semanticAssessment.reasoning);
 }
